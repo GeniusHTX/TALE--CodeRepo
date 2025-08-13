@@ -10,6 +10,16 @@ from repo_agent.settings import SettingsManager
 latest_verison_substring = "_latest_version.py"
 
 
+def ignore_illegal_character(input_string):
+    gbk_string = ""
+    for input_char in input_string:
+        try:
+            gbk_string += input_char.encode('utf-8', errors='ignore').decode('utf-8')
+        except:
+            pass
+    return gbk_string
+
+
 def make_fake_files():
     """根据git status检测暂存区信息。如果有文件：
     1. 新增文件，没有add。无视
@@ -53,6 +63,8 @@ def make_fake_files():
         now_file_path = diff_file.a_path  # 针对repo_path的相对路径
         if now_file_path.endswith(".py"):
             raw_file_content = diff_file.a_blob.data_stream.read().decode("utf-8")
+            # windows默认编码格式为gbk, 指定utf-8后对编码进行一次筛选
+            raw_file_content = ignore_illegal_character(raw_file_content)
             latest_file_path = now_file_path[:-3] + latest_verison_substring
             if os.path.exists(os.path.join(setting.project.target_repo, now_file_path)):
                 os.rename(
@@ -69,12 +81,14 @@ def make_fake_files():
                 )
                 with open(
                     os.path.join(setting.project.target_repo, latest_file_path), "w"
-                ) as writer:
+                ):
                     pass
             with open(
-                os.path.join(setting.project.target_repo, now_file_path), "w"
-            ) as writer:
-                writer.write(raw_file_content)
+                os.path.join(setting.project.target_repo, now_file_path), "w", encoding='utf-8'
+            ) as f:
+                # 确保以utf-8编码
+                f.write(raw_file_content)
+
             file_path_reflections[now_file_path] = latest_file_path  # real指向fake
     return file_path_reflections, jump_files
 
