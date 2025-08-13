@@ -8,11 +8,12 @@
    ```
 3. 使用如下命令即可运行repoAgent
    ```shell
-   python main_wh.py
+   python run.py --OPENAI_API_KEY your_api_key --model gpt-4o-mini --language Chinese
    ```
-   相关配置可以根据需要在main_wh.py中修改
+   相关配置可以根据需要在main_wh.py中修改, 默认参数如下:
    ```python
    def run(
+    OPENAI_API_KEY: str,
     model="gpt-4o-mini",
     temperature=0.2,
     request_timeout=60,
@@ -40,3 +41,11 @@
 
     # messages[-1].content += f'use less than {token_budget}'
     ```
+   
+## 注意事项
+OPENAI_API_KEY 是必填项目
+
+不提供的参数将使用默认参数
+
+你的本地/远程项目必须被git仓库记录
+
